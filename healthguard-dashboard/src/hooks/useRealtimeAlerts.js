@@ -52,8 +52,9 @@ export const useRealtimeAlerts = () => {
                 } else {
                     // Subsequent updates: check for new critical alerts
                     const newCriticalAlerts = alertsArray.filter(
-                        a => (a.severity || 'critical') === 'critical' &&
-                            !knownAlertIdsRef.current.has(a.id)
+                        a => a.severity === 'critical' && 
+                        a.status === 'active' &&
+                        !knownAlertIdsRef.current.has(a.id)
                     );
 
                     if (newCriticalAlerts.length > 0) {

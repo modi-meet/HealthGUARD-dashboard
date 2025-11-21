@@ -3,69 +3,69 @@ import { theme } from '../../config/theme';
 import { formatDistanceToNow } from 'date-fns';
 
 const AlertCard = ({ alert, onAcknowledge, onResolve }) => {
-    return (
-        <Card critical={alert.severity === 'critical'}>
-            <CardHeader>
-                <UserInfo>
-                    <UserAvatar critical={alert.severity === 'critical'}>
-                        {alert.userId.substring(0, 2).toUpperCase()}
-                    </UserAvatar>
-                    <div>
-                        <UserId>ID: {alert.userId.substring(0, 8)}</UserId>
-                        <TimeAgo>{formatDistanceToNow(alert.timestampDate, { addSuffix: true })}</TimeAgo>
-                    </div>
-                </UserInfo>
-                <StatusBadge status={alert.status}>{alert.status}</StatusBadge>
-            </CardHeader>
+  return (
+    <Card critical={alert.severity === 'critical'}>
+      <CardHeader>
+        <UserInfo>
+          <UserAvatar critical={alert.severity === 'critical'}>
+            {alert.userId.substring(0, 2).toUpperCase()}
+          </UserAvatar>
+          <div>
+            <UserId>ID: {alert.userId.substring(0, 8)}</UserId>
+            <TimeAgo>{formatDistanceToNow(alert.timestampDate, { addSuffix: true })}</TimeAgo>
+          </div>
+        </UserInfo>
+        <StatusBadge status={alert.status}>{alert.status}</StatusBadge>
+      </CardHeader>
 
-            <VitalsContainer>
-                <VitalItem>
-                    <VitalLabel>HR</VitalLabel>
-                    <VitalValue critical={alert.vitals.heartRate > 150 || alert.vitals.heartRate < 40}>
-                        {alert.vitals.heartRate}
-                        <Unit>bpm</Unit>
-                    </VitalValue>
-                </VitalItem>
-                <VitalItem>
-                    <VitalLabel>SpO2</VitalLabel>
-                    <VitalValue critical={alert.vitals.spO2 < 90}>
-                        {alert.vitals.spO2}
-                        <Unit>%</Unit>
-                    </VitalValue>
-                </VitalItem>
-                <VitalItem>
-                    <VitalLabel>BP</VitalLabel>
-                    <VitalValue>
-                        {alert.vitals.bloodPressure}
-                    </VitalValue>
-                </VitalItem>
-            </VitalsContainer>
+      <VitalsContainer>
+        <VitalItem>
+          <VitalLabel>HR</VitalLabel>
+          <VitalValue critical={alert.vitals.heartRate > 150 || alert.vitals.heartRate < 40}>
+            {alert.vitals.heartRate}
+            <Unit>bpm</Unit>
+          </VitalValue>
+        </VitalItem>
+        <VitalItem>
+          <VitalLabel>SpO2</VitalLabel>
+          <VitalValue critical={alert.vitals.spO2 < 90}>
+            {alert.vitals.spO2}
+            <Unit>%</Unit>
+          </VitalValue>
+        </VitalItem>
+        <VitalItem>
+          <VitalLabel>BP</VitalLabel>
+          <VitalValue>
+            {alert.vitals.bloodPressure}
+          </VitalValue>
+        </VitalItem>
+      </VitalsContainer>
 
-            {alert.droneDispatched && (
-                <DroneInfo>
-                    <span>🚁 Drone ETA</span>
-                    <strong>{alert.droneETA} min</strong>
-                </DroneInfo>
-            )}
+      {alert.droneDispatched && (
+        <DroneInfo>
+          <span>🚁 Drone ETA</span>
+          <strong>{alert.droneETA} min</strong>
+        </DroneInfo>
+      )}
 
-            {alert.status === 'active' && (
-                <ActionGrid>
-                    <ActionButton
-                        variant="secondary"
-                        onClick={(e) => { e.stopPropagation(); onAcknowledge(alert.id); }}
-                    >
-                        Ack
-                    </ActionButton>
-                    <ActionButton
-                        variant="primary"
-                        onClick={(e) => { e.stopPropagation(); onResolve(alert.id); }}
-                    >
-                        Resolve
-                    </ActionButton>
-                </ActionGrid>
-            )}
-        </Card>
-    );
+      {alert.status === 'active' && (
+        <ActionGrid>
+          <ActionButton
+            variant="secondary"
+            onClick={(e) => { e.stopPropagation(); onAcknowledge(alert.id); }}
+          >
+            Acknowledge
+          </ActionButton>
+          <ActionButton
+            variant="primary"
+            onClick={(e) => { e.stopPropagation(); onResolve(alert.id); }}
+          >
+            Resolve
+          </ActionButton>
+        </ActionGrid>
+      )}
+    </Card>
+  );
 };
 
 const Card = styled.div`
