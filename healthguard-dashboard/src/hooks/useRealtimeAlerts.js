@@ -17,11 +17,31 @@ export const useRealtimeAlerts = () => {
         const unsubscribe = onValue(alertsRef, (snapshot) => {
             const data = snapshot.val();
             if (data) {
-                const alertsArray = Object.entries(data).map(([id, alert]) => ({
-                    id,
-                    ...alert,
-                    timestampDate: new Date(alert.timestamp * 1000)
-                }));
+                const alertsArray = Object.entries(data)
+                    .map(([id, alert]) => ({
+                        id,
+                        ...alert,
+                        // Map new structure to app's expected format
+                        location: {
+                            latitude: alert.latitude,
+                            longitude: alert.longitude
+                        },
+                        vitals: {
+                            heartRate: alert.vitals?.heartRate,
+                            spO2: alert.vitals?.sp02 || alert.vitals?.spO2, // Handle both keys
+                            bloodPressure: alert.vitals?.bloodPressure || '120/80' // Default if missing
+                        },
+                        severity: alert.severity || 'critical', // Default to critical
+                        status: alert.status || 'active',       // Default to active
+                        droneDispatched: alert.droneDispatched || false,
+                        timestampDate: new Date(alert.timestamp * 1000)
+                    }))
+                    .filter(alert =>
+                        alert.location.latitude !== undefined &&
+                        alert.location.longitude !== undefined &&
+                        !isNaN(alert.location.latitude) &&
+                        !isNaN(alert.location.longitude)
+                    );
 
                 alertsArray.sort((a, b) => b.timestamp - a.timestamp);
 
@@ -32,8 +52,9 @@ export const useRealtimeAlerts = () => {
                 } else {
                     // Subsequent updates: check for new critical alerts
                     const newCriticalAlerts = alertsArray.filter(
-                        a => a.severity === 'critical' &&
-                            !knownAlertIdsRef.current.has(a.id)
+                        a => a.severity === 'critical' && 
+                        a.status === 'active' &&
+                        !knownAlertIdsRef.current.has(a.id)
                     );
 
                     if (newCriticalAlerts.length > 0) {
@@ -93,19 +114,13 @@ const simulateAlert = () => {
     const testAlert = {
         userId: randomName,
         timestamp: Date.now() / 1000,
-        severity: 'critical',
-        status: 'active',
-        location: {
-            latitude: 12.9716 + (Math.random() - 0.5) * 0.1,
-            longitude: 77.5946 + (Math.random() - 0.5) * 0.1
-        },
+        latitude: 12.9716 + (Math.random() - 0.5) * 0.1,
+        longitude: 77.5946 + (Math.random() - 0.5) * 0.1,
         vitals: {
             heartRate: 150 + Math.floor(Math.random() * 30),
-            spO2: 80 + Math.floor(Math.random() * 15),
+            sp02: 80 + Math.floor(Math.random() * 15), // Note: sp02 (lowercase 0) to match new format
             bloodPressure: `${140 + Math.floor(Math.random() * 40)}/${90 + Math.floor(Math.random() * 20)}`
-        },
-        droneDispatched: true,
-        droneETA: Math.floor(Math.random() * 15) + 1
+        }
     };
 
     set(ref(database, `emergencies/${id}`), testAlert).catch(err => {
